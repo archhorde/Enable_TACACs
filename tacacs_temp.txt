@@ -1,0 +1,41 @@
+aaa new-model
+
+
+
+
+
+aaa group server tacacs+ management
+
+server-private 192.168.1.1 timeout 1 key 7 password
+
+server-private 192.168.1.100 timeout 1 key 7 password
+
+ip tacacs source-interface Loopback66
+
+
+
+aaa authentication login default group management local
+
+aaa authentication enable default group management enable
+
+aaa authorization console
+
+aaa authorization exec default group management local
+
+aaa authorization commands 1 default group management local
+
+aaa authorization commands 15 default group management local
+
+aaa authorization network default group management local
+
+aaa accounting exec default start-stop group management
+
+aaa accounting commands 1 default start-stop group management
+
+aaa accounting commands 15 default start-stop group management
+
+aaa accounting network default start-stop group management
+
+aaa accounting connection default start-stop group management
+
+aaa accounting system default start-stop group management
