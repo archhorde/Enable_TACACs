@@ -2,12 +2,11 @@ from netmiko import ConnectHandler
 
 net_connect = ''
 
-def do_login():
-    #Starts an SSH connection to a router
+#Starts an SSH connection to a router
+def do_login(ip):
     global net_connect
-    ip = input("Enter router IP:\n")
-    uname = input("Enter Username:\n")
-    pw = input("Enter Password:\n")
+    uname = "admin"
+    pw = "labadmin8"
 
     ROUTER = {
         'device_type': 'cisco_ios',
@@ -16,28 +15,45 @@ def do_login():
         'ip': ip,
     }
     net_connect = ConnectHandler(**ROUTER)
+    print("Connected to " + ip)
 
-def do_check_tacacs(file):
-    #Checks if tacacs is already enabled
+#Checks if tacacs is already enabled.
+def do_check_tacacs(ip):
     global net_connect
-    #output = net_connect.send_command('show run')
-    #print(output)
+    do_login(ip)
+    output = net_connect.send_command('show tacacs')
+    if len(output) > 0:
+        print ("Tacacs is enabled")
+        return True
+    else:
+        do_add_tacacs(ip)
 
-def do_add_tacacs(ip):
-    #Change the speed and duplex of a router"""
+def do_get_wan_int():
     global net_connect
+    output = net_connect.send_command('show ip cef')
 
-    #output = net_connect.send_config_set(config_commands)
+# Adds Tacacs to a router.
+def do_add_tacacs():
+    global net_connect
+    with open("tacacs_temp.txt", "r") as f:
+        print("Adding Tacacs...")
+        output = net_connect.send_config_set(f)
 
 
 #Main loop of program
 def main():
 
-    f = open("router_list.txt", "r")
-    #print(f.read())
-    for line in f:
-        line = f.readline()
+    with open("router_list.txt", "r") as f:
+        for line in f:
+            line = line.strip()
+            pair = line.split()
+            host = pair[0]
+            ip = pair[1]
+            print("HOST IS: " + host + " IP IS: " + ip)
 
+            if do_check_tacacs(ip) == False:
+                do_add_tacacs(ip)
+                print("Added tacacs for IP " + ip)
 
 
 if __name__ == '__main__':
