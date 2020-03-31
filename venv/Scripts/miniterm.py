@@ -1,4 +1,4 @@
-#!c:\users\labuser\tacacs_change\enable_tacacs\venv\scripts\python.exe
+#!c:\users\nilo3\enable_tacacs\venv\scripts\python.exe
 #
 # Very simple serial terminal
 #

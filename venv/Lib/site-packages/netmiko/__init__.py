@@ -23,7 +23,7 @@ from netmiko.scp_functions import file_transfer
 # Alternate naming
 Netmiko = ConnectHandler
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 __all__ = (
     "ConnectHandler",
     "ssh_dispatcher",
@@ -34,8 +34,6 @@ __all__ = (
     "NetmikoAuthenticationException",
     "NetMikoTimeoutException",
     "NetMikoAuthenticationException",
-    "NetmikoTimeoutError",
-    "NetmikoAuthError",
     "InLineTransfer",
     "redispatch",
     "SSHDetect",
