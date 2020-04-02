@@ -1,16 +1,12 @@
 aaa new-model
 
 
-
-
-
 aaa group server tacacs+ management
 
 server-private 192.168.1.1 timeout 1 key 7 password
 
 server-private 192.168.1.100 timeout 1 key 7 password
 
-ip tacacs source-interface Loopback66
 
 
 

@@ -70,31 +70,54 @@ def do_add_tacacs(int):
     global net_connect
     source_int = "ip tacacs source-interface " + int
 
-    with open("tacacs_temp.txt", "a") as a:
-        a.write(source_int)
+    if os.path.exists("newtacacs.txt"):
+        os.remove("newtacacs.txt")
 
-    with open("tacacs_temp.txt", "r") as f:
-        print("Adding Tacacs...")
+    outputfile = open("newtacacs.txt", "x")
+    outputfile.close()
 
-        output = net_connect.send_config_set(f)
+    with open("newtacacs.txt", "a") as a:
+        with open("tacacs_temp.txt", "r") as f:
+            for line in f:
+                a.write(line)
+            a.write(source_int)
 
+            print("Adding Tacacs...")
+
+    outputfile = open("newtacacs.txt", "r")
+    output = net_connect.send_config_set(outputfile)
+    outputfile.close()
+
+    if os.path.exists("newtacacs.txt"):
+        os.remove("newtacacs.txt")
+
+def do_save_config():
+    global net_connect
+    net_connect.save_config(confirm = True)
+    print("config saved")
 
 #Main loop of program
 def main():
 
-    #do_get_wan_int()
-    with open("router_list.txt", "r") as f:
-        for line in f:
-            line = line.strip()
-            pair = line.split()
-            host = pair[0]
-            ip = pair[1]
-            print("HOST IS: " + host + " IP IS: " + ip)
+    if os.path.exists("results.txt"):
+        os.remove("results.txt")
 
-            if do_check_tacacs(ip) == False:
-                int = do_get_wan_int()
-                do_add_tacacs(int)
-                print("Added tacacs for IP " + ip)
+    with open("router_list.txt", "r") as f:
+        with open("results.txt", "w") as a:
+            for line in f:
+                line = line.strip()
+                pair = line.split()
+                host = pair[0]
+                ip = pair[1]
+                #print("HOST IS: " + host + " IP IS: " + ip)
+
+                if do_check_tacacs(ip) == False:
+                    int = do_get_wan_int()
+                    do_add_tacacs(int)
+                    do_save_config()
+                    a.write(host + " " + ip + " success")
+                else:
+                    a.write(host + " " + ip + " failure")
 
 
 if __name__ == '__main__':
