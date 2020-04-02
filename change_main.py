@@ -29,6 +29,7 @@ def do_check_tacacs(ip):
     else:
         return False
 
+#Get the internet facing interface, as shown by show ip cef
 def do_get_wan_int():
     global net_connect
     route = "none"
@@ -43,6 +44,7 @@ def do_get_wan_int():
     outputfile.write(output)
     outputfile.close()
 
+    #Looping through output of show ip cef, looking for the default route's next hop interface
     with open ("showcefoutput.txt", "r") as f:
         for line in f:
             line = line.strip()
@@ -70,12 +72,14 @@ def do_add_tacacs(int):
     global net_connect
     source_int = "ip tacacs source-interface " + int
 
+    #Creates a new temp text file to store new tacacs config, deleting the file if it already exists
     if os.path.exists("newtacacs.txt"):
         os.remove("newtacacs.txt")
 
     outputfile = open("newtacacs.txt", "x")
     outputfile.close()
 
+    #Copies tacacs template into new file, then adds proper wan interface to end
     with open("newtacacs.txt", "a") as a:
         with open("tacacs_temp.txt", "r") as f:
             for line in f:
@@ -88,15 +92,17 @@ def do_add_tacacs(int):
     output = net_connect.send_config_set(outputfile)
     outputfile.close()
 
+    #Deletes temp tacacs config file
     if os.path.exists("newtacacs.txt"):
         os.remove("newtacacs.txt")
 
+#Save config of the router
 def do_save_config():
     global net_connect
     net_connect.save_config(confirm = True)
     print("config saved")
 
-#Main loop of program
+#Main loop of program, output is a results.txt file in format [hostname ip success/failure]
 def main():
 
     if os.path.exists("results.txt"):
@@ -109,15 +115,14 @@ def main():
                 pair = line.split()
                 host = pair[0]
                 ip = pair[1]
-                #print("HOST IS: " + host + " IP IS: " + ip)
 
                 if do_check_tacacs(ip) == False:
                     int = do_get_wan_int()
                     do_add_tacacs(int)
                     do_save_config()
-                    a.write(host + " " + ip + " success")
+                    a.write(host + " " + ip + " success\n")
                 else:
-                    a.write(host + " " + ip + " failure")
+                    a.write(host + " " + ip + " failure\n")
 
 
 if __name__ == '__main__':
