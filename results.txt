@@ -1,6 +1,4 @@
-R1 192.168.31.130 failure
-R2 192.168.31.135 success
-R3 192.168.31.134 success
-R4 192.168.31.133 success
-R5 192.168.31.132 success
-R6 192.168.31.131 success
+Router1 192.168.198.129 tacacs enabled
+Router2 192.168.198.132 tacacs enabled
+Router3 192.168.198.133 tacacs enabled
+Router4 192.168.198.194 tacacs enabled

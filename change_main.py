@@ -6,28 +6,67 @@ net_connect = ''
 #Starts an SSH connection to a router
 def do_login(ip):
     global net_connect
-    uname = "admin"
-    pw = "labadmin8"
 
-    ROUTER = {
+    TROUTER = {
         'device_type': 'cisco_ios',
-        'username': uname,
-        'password': pw,
+        'username': "test",
+        'password': "test",
         'ip': ip,
     }
-    net_connect = ConnectHandler(**ROUTER)
-    print("Connected to " + ip)
+    NOCROUTER  = {
+        'device_type': 'cisco_ios',
+        'username': "user",
+        'password': "pass",
+        'ip': ip,
+        'secret': 'Granite1!'
+    }
+    CLOUD  = {
+        'device_type': 'cisco_ios',
+        'username': "base",
+        'password': "pass",
+        'ip': ip,
+        'secret': 'cisco'
+    }
+    while True:
+        try:
+            net_connect = ConnectHandler(**TROUTER)
+            print("Connected to " + ip)
+            break
+        except:
+            print("Failed to login with tacacs")
+            pass
+
+        try:
+            net_connect = ConnectHandler(**NOCROUTER)
+            print("Connected to " + ip)
+            break
+        except:
+            print("Failed to login with noc creds")
+            pass
+
+        try:
+            net_connect = ConnectHandler(**CLOUD)
+            print("Connected to " + ip)
+            break
+        except:
+            print("Failed to login with cloud creds")
+            pass
+
 
 #Checks if tacacs is already enabled.
 def do_check_tacacs(ip):
     global net_connect
-    do_login(ip)
-    output = net_connect.send_command('show tacacs')
-    if len(output) > 0:
-        print ("Tacacs is enabled")
-        return True
-    else:
-        return False
+    FAIL = "FAIL"
+    try:
+        do_login(ip)
+        output = net_connect.send_command('show tacacs')
+        if len(output) > 0:
+            print ("Tacacs is enabled")
+            return True
+        else:
+            return False
+    except:
+        return FAIL
 
 #Get the internet facing interface, as shown by show ip cef
 def do_get_wan_int():
@@ -88,6 +127,7 @@ def do_add_tacacs(int):
 
             print("Adding Tacacs...")
 
+    print(net_connect.enable())
     outputfile = open("newtacacs.txt", "r")
     output = net_connect.send_config_set(outputfile)
     outputfile.close()
@@ -99,7 +139,7 @@ def do_add_tacacs(int):
 #Save config of the router
 def do_save_config():
     global net_connect
-    net_connect.save_config(confirm = True)
+    #net_connect.save_config(confirm = True)
     print("config saved")
 
 #Main loop of program, output is a results.txt file in format [hostname ip success/failure]
@@ -116,14 +156,16 @@ def main():
                 host = pair[0]
                 ip = pair[1]
 
-                if do_check_tacacs(ip) == False:
+                result = do_check_tacacs(ip)
+                if  result == False:
                     int = do_get_wan_int()
                     do_add_tacacs(int)
                     do_save_config()
-                    a.write(host + " " + ip + " success\n")
+                    a.write(host + " " + ip + " tacacs enabled\n")
+                elif result ++ True:
+                    a.write(host + " " + ip + " tacacs already enabled\n")
                 else:
-                    a.write(host + " " + ip + " failure\n")
-
+                    a.write(host + " " + ip + " unreachable\n")
 
 if __name__ == '__main__':
     main()
